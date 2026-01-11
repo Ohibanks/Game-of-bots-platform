@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trophy, Crown, Shield, Swords, AlertTriangle, Clock, Users, CheckCircle, Calendar, UserPlus } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const LAGOS_TZ_OFFSET = 1;
 const COMPETITION_START_HOUR = 0;
@@ -65,6 +66,9 @@ export default function GameOfBots() {
       finalEquity: 11432
     }
   ];
+  useEffect(() => {
+  fetchTraders();
+}, []);
 
   const [liveTraders, setLiveTraders] = useState([
     { id: 1, name: 'Ade Thunder', email: 'ade@example.com', startEquity: 10000, currentEquity: 12850, avatar: '⚔️', isConnected: true },
@@ -148,16 +152,48 @@ export default function GameOfBots() {
     return <span className="w-6 h-6 flex items-center justify-center text-gray-500">{index + 1}</span>;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newTrader = {
-      id: Date.now(),
-      ...formData,
-      avatar: ['⚔️', '🐺', '🦁', '🐉', '🦅', '🐍', '🐆', '🦅', '🐻', '🦅'][Math.floor(Math.random() * 10)],
-      registeredAt: new Date().toISOString()
-    };
+const fetchTraders = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('traders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    setRegisteredTraders(data || []);
+  } catch (error) {
+    console.error('Error fetching traders:', error);
+  }
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  try {
+    const { data, error } = await supabase
+      .from('traders')
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  try {
+    const { data, error } = await supabase
+      .from('traders')
+      .insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          broker_server: formData.brokerServer,
+          login_id: formData.loginId,
+          investor_password: formData.investorPassword
+        }
+      ])
+      .select();
+
+    if (error) throw error;
+
+    alert('✅ Registration successful! You will receive a confirmation email shortly.');
     
-    setRegisteredTraders([...registeredTraders, newTrader]);
     setFormData({
       name: '',
       email: '',
@@ -166,8 +202,14 @@ export default function GameOfBots() {
       investorPassword: ''
     });
     setShowRegistrationForm(false);
-    alert('✅ Registration successful! You will receive a confirmation email shortly.');
-  };
+    
+    // Refresh the registered traders list
+    fetchTraders();
+  } catch (error) {
+    console.error('Error registering trader:', error);
+    alert('❌ Registration failed. Please try again.');
+  }
+};
 
   if (currentPage === 'registration') {
     return (
