@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trophy, Crown, Shield, Swords, AlertTriangle, Clock, Users, CheckCircle, Calendar, UserPlus } from 'lucide-react';
-import { supabase } from '@/lib/supabase';.
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const LAGOS_TZ_OFFSET = 1;
 const COMPETITION_START_HOUR = 0;
