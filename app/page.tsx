@@ -660,7 +660,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <div className={`text-3xl font-bold ${textColors[index]}`}>+{trader.growth}%</div>
               </div>
             );
-          })}
+          })};
         </div>
       </div>
 
